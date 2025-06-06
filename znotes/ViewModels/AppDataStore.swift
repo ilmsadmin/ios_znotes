@@ -159,40 +159,42 @@ class AppDataStore: ObservableObject {
         return assignments.first(where: { $0.id == id })
     }
     
-    // MARK: - Filtered Results
+    // MARK: - Search Filtered Results
     var filteredNotes: [Note] {
         if searchText.isEmpty {
             return notes
-        } else {
-            return notes.filter {
-                $0.title.localizedCaseInsensitiveContains(searchText) ||
-                $0.content.localizedCaseInsensitiveContains(searchText) ||
-                $0.tags.contains(where: { $0.localizedCaseInsensitiveContains(searchText) })
-            }
+        }
+        return notes.filter { note in
+            note.title.localizedCaseInsensitiveContains(searchText) ||
+            note.content.localizedCaseInsensitiveContains(searchText) ||
+            note.tags.contains { $0.localizedCaseInsensitiveContains(searchText) }
         }
     }
     
     var filteredTasks: [Task] {
         if searchText.isEmpty {
             return tasks
-        } else {
-            return tasks.filter {
-                $0.title.localizedCaseInsensitiveContains(searchText) ||
-                $0.description.localizedCaseInsensitiveContains(searchText) ||
-                $0.tags.contains(where: { $0.localizedCaseInsensitiveContains(searchText) })
-            }
+        }
+        return tasks.filter { task in
+            task.title.localizedCaseInsensitiveContains(searchText) ||
+            task.description.localizedCaseInsensitiveContains(searchText) ||
+            task.tags.contains { $0.localizedCaseInsensitiveContains(searchText) } ||
+            task.priority.rawValue.localizedCaseInsensitiveContains(searchText) ||
+            task.status.rawValue.localizedCaseInsensitiveContains(searchText)
         }
     }
     
     var filteredIssues: [Issue] {
         if searchText.isEmpty {
             return issues
-        } else {
-            return issues.filter {
-                $0.title.localizedCaseInsensitiveContains(searchText) ||
-                $0.description.localizedCaseInsensitiveContains(searchText) ||
-                $0.tags.contains(where: { $0.localizedCaseInsensitiveContains(searchText) })
-            }
+        }
+        return issues.filter { issue in
+            issue.title.localizedCaseInsensitiveContains(searchText) ||
+            issue.description.localizedCaseInsensitiveContains(searchText) ||
+            issue.tags.contains { $0.localizedCaseInsensitiveContains(searchText) } ||
+            issue.priority.rawValue.localizedCaseInsensitiveContains(searchText) ||
+            issue.status.rawValue.localizedCaseInsensitiveContains(searchText) ||
+            issue.comments.contains { $0.content.localizedCaseInsensitiveContains(searchText) }
         }
     }
     

@@ -46,7 +46,7 @@ struct DashboardView: View {
     ]
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
                     // Stats Overview
@@ -62,6 +62,10 @@ struct DashboardView: View {
             }
             .navigationTitle("Dashboard")
             .searchable(text: $searchText, prompt: "Search notes, tasks, issues...")
+            .onAppear {
+                // Reset search text when view appears
+                searchText = ""
+            }
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Menu {
@@ -109,192 +113,16 @@ struct DashboardView: View {
             }
         }
         .sheet(isPresented: $showingNewNoteSheet) {
-            NavigationView {
-                Form {
-                    Section(header: Text("Note Details")) {
-                        TextField("Title", text: $newNoteTitle)
-                        TextEditor(text: $newNoteContent)
-                            .frame(minHeight: 100)
-                    }
-                    
-                    Section {
-                        Button("Save") {
-                            // Action to save new note
-                            let note = Note(
-                                id: UUID(),
-                                title: newNoteTitle,
-                                content: newNoteContent,
-                                createdAt: Date(),
-                                updatedAt: Date()
-                            )
-                            dataStore.notes.append(note)
-                            showingNewNoteSheet = false
-                        }
-                    }
-                }
-                .navigationTitle("New Note")
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarLeading) {
-                        Button("Cancel") {
-                            showingNewNoteSheet = false
-                        }
-                    }
-                }
-            }
+            NoteFormView(mode: .add)
         }
         .sheet(isPresented: $showingNewTaskSheet) {
-            NavigationView {
-                Form {
-                    Section(header: Text("Task Details")) {
-                        TextField("Title", text: $newTaskTitle)
-                        TextField("Description", text: $newTaskDescription)
-                        
-                        Picker("Priority", selection: $newTaskPriority) {
-                            ForEach(Priority.allCases, id: \.self) { priority in
-                                Text(priority.rawValue.capitalized).tag(priority)
-                            }
-                        }
-                        
-                        Toggle("Has Due Date", isOn: $newTaskHasDueDate)
-                        
-                        if newTaskHasDueDate {
-                            DatePicker("Due Date", selection: $newTaskDueDate, displayedComponents: .date)
-                        }
-                    }
-                    
-                    Section {
-                        Button("Save") {
-                            // Action to save new task
-                            let task = Task(
-                                id: UUID(),
-                                title: newTaskTitle,
-                                description: newTaskDescription,
-                                priority: newTaskPriority,
-                                status: newTaskStatus,
-                                dueDate: newTaskHasDueDate ? newTaskDueDate : nil,
-                                createdAt: Date(),
-                                updatedAt: Date()
-                            )
-                            dataStore.tasks.append(task)
-                            showingNewTaskSheet = false
-                        }
-                    }
-                }
-                .navigationTitle("New Task")
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarLeading) {
-                        Button("Cancel") {
-                            showingNewTaskSheet = false
-                        }
-                    }
-                }
-            }
+            TaskFormView(mode: .add)
         }
         .sheet(isPresented: $showingNewIssueSheet) {
-            NavigationView {
-                Form {
-                    Section(header: Text("Issue Details")) {
-                        TextField("Title", text: $newIssueTitle)
-                        TextField("Description", text: $newIssueDescription)
-                        
-                        Picker("Priority", selection: $newIssuePriority) {
-                            ForEach(Priority.allCases, id: \.self) { priority in
-                                Text(priority.rawValue.capitalized).tag(priority)
-                            }
-                        }
-                    }
-                    
-                    Section {
-                        Button("Save") {
-                            // Action to save new issue
-                            if let reporterID = newIssueReporterID ?? dataStore.people.first?.id {
-                                let issue = Issue(
-                                    id: UUID(),
-                                    title: newIssueTitle,
-                                    description: newIssueDescription,
-                                    priority: newIssuePriority,
-                                    status: newIssueStatus,
-                                    reporterID: reporterID,
-                                    createdAt: Date(),
-                                    updatedAt: Date()
-                                )
-                                dataStore.issues.append(issue)
-                                showingNewIssueSheet = false
-                            }
-                        }
-                    }
-                }
-                .navigationTitle("New Issue")
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarLeading) {
-                        Button("Cancel") {
-                            showingNewIssueSheet = false
-                        }
-                    }
-                }
-            }
+            IssueFormView(mode: .add)
         }
         .sheet(isPresented: $showingNewAssignmentSheet) {
-            NavigationView {
-                Form {
-                    Section(header: Text("Assignment Details")) {
-                        Picker("Type", selection: $newAssignmentType) {
-                            ForEach(AssignmentType.allCases, id: \.self) { type in
-                                Text(type.rawValue.capitalized).tag(type)
-                            }
-                        }
-                        
-                        if newAssignmentType == .task {
-                            Picker("Task", selection: $newAssignmentItemID) {
-                                ForEach(dataStore.tasks) { task in
-                                    Text(task.title).tag(task.id)
-                            }
-                        }
-                        .pickerStyle(MenuPickerStyle())
-                        }
-                        
-                        if newAssignmentType == .issue {
-                            Picker("Issue", selection: $newAssignmentItemID) {
-                                ForEach(dataStore.issues) { issue in
-                                    Text(issue.title).tag(issue.id)
-                            }
-                        }
-                        .pickerStyle(MenuPickerStyle())
-                        }
-                        
-                        DatePicker("Due Date", selection: $newAssignmentDueDate, displayedComponents: .date)
-                            .labelsHidden()
-                        
-                        TextField("Notes", text: $newAssignmentNotes)
-                    }
-                    
-                    Section {
-                        Button("Save") {
-                            // Action to save new assignment
-                            let assignment = Assignment(
-                                id: UUID(),
-                                type: newAssignmentType,
-                                itemID: newAssignmentItemID ?? UUID(), // Provide a default UUID if nil
-                                personID: newAssignmentPersonID ?? dataStore.people.first?.id ?? UUID(), // Use first person or create new UUID
-                                dueDate: newAssignmentDueDate,
-                                notes: newAssignmentNotes.isEmpty ? nil : newAssignmentNotes,
-                                createdAt: Date(),
-                                updatedAt: Date()
-                            )
-                            dataStore.assignments.append(assignment)
-                            showingNewAssignmentSheet = false
-                        }
-                    }
-                }
-                .navigationTitle("New Assignment")
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarLeading) {
-                        Button("Cancel") {
-                            showingNewAssignmentSheet = false
-                        }
-                    }
-                }
-            }
+            AssignmentFormView(mode: .add)
         }
     }
     
@@ -350,36 +178,45 @@ struct DashboardView: View {
                 HStack(spacing: 16) {
                     // Show most recent notes, tasks, and issues
                     ForEach(dataStore.notes.prefix(3)) { note in
-                        RecentItemCard(
-                            title: note.title,
-                            subtitle: "Note",
-                            description: note.content,
-                            date: note.updatedAt,
-                            icon: "note.text",
-                            color: .blue
-                        )
+                        NavigationLink(destination: NoteDetailView(note: note)) {
+                            RecentItemCard(
+                                title: note.title,
+                                subtitle: "Note",
+                                description: note.content,
+                                date: note.updatedAt,
+                                icon: "note.text",
+                                color: .blue
+                            )
+                        }
+                        .buttonStyle(PlainButtonStyle())
                     }
                     
                     ForEach(dataStore.tasks.prefix(3)) { task in
-                        RecentItemCard(
-                            title: task.title,
-                            subtitle: "Task",
-                            description: task.description,
-                            date: task.updatedAt,
-                            icon: "checklist",
-                            color: .green
-                        )
+                        NavigationLink(destination: TaskDetailView(task: task)) {
+                            RecentItemCard(
+                                title: task.title,
+                                subtitle: "Task",
+                                description: task.description,
+                                date: task.updatedAt,
+                                icon: "checklist",
+                                color: .green
+                            )
+                        }
+                        .buttonStyle(PlainButtonStyle())
                     }
                     
                     ForEach(dataStore.issues.prefix(2)) { issue in
-                        RecentItemCard(
-                            title: issue.title,
-                            subtitle: "Issue",
-                            description: issue.description,
-                            date: issue.updatedAt,
-                            icon: "exclamationmark.triangle",
-                            color: .orange
-                        )
+                        NavigationLink(destination: IssueDetailView(issue: issue)) {
+                            RecentItemCard(
+                                title: issue.title,
+                                subtitle: "Issue",
+                                description: issue.description,
+                                date: issue.updatedAt,
+                                icon: "exclamationmark.triangle",
+                                color: .orange
+                            )
+                        }
+                        .buttonStyle(PlainButtonStyle())
                     }
                 }
                 .padding(.horizontal, 4)

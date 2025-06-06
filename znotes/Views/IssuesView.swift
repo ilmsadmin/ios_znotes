@@ -90,7 +90,15 @@ struct IssuesView: View {
     }
     
     func deleteIssues(at offsets: IndexSet) {
-        dataStore.deleteIssue(at: offsets)
+        // Move issues to trash instead of deleting them permanently
+        offsets.forEach { index in
+            let issue = filteredIssues[index]
+            if let originalIndex = dataStore.issues.firstIndex(where: { $0.id == issue.id }) {
+                let issueToTrash = dataStore.issues[originalIndex]
+                dataStore.moveIssueToTrash(issueToTrash)
+                dataStore.issues.remove(at: originalIndex)
+            }
+        }
     }
 }
 

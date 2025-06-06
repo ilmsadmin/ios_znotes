@@ -10,7 +10,6 @@ import SwiftUI
 struct TasksView: View {
     @EnvironmentObject var dataStore: AppDataStore
     @State private var showAddSheet = false
-    @State private var searchText = ""
     @State private var selectedStatus: TaskStatus?
     
     var body: some View {
@@ -44,7 +43,7 @@ struct TasksView: View {
                     }
                     .onDelete(perform: deleteTasks)
                 }
-                .searchable(text: $searchText, prompt: "Search tasks")
+                .searchable(text: $dataStore.searchText, prompt: "Search tasks")
             }
             .navigationTitle("Tasks")
             .toolbar {
@@ -71,11 +70,11 @@ struct TasksView: View {
         }
         
         // Apply search filter if text is not empty
-        if !searchText.isEmpty {
+        if !dataStore.searchText.isEmpty {
             tasks = tasks.filter { task in
-                task.title.localizedCaseInsensitiveContains(searchText) ||
-                task.description.localizedCaseInsensitiveContains(searchText) ||
-                task.tags.contains(where: { $0.localizedCaseInsensitiveContains(searchText) })
+                task.title.localizedCaseInsensitiveContains(dataStore.searchText) ||
+                task.description.localizedCaseInsensitiveContains(dataStore.searchText) ||
+                task.tags.contains(where: { $0.localizedCaseInsensitiveContains(dataStore.searchText) })
             }
         }
         
@@ -94,7 +93,15 @@ struct TasksView: View {
     }
     
     func deleteTasks(at offsets: IndexSet) {
-        dataStore.deleteTask(at: offsets)
+        // Move tasks to trash instead of deleting them permanently
+        offsets.forEach { index in
+            let task = filteredTasks[index]
+            if let originalIndex = dataStore.tasks.firstIndex(where: { $0.id == task.id }) {
+                let taskToTrash = dataStore.tasks[originalIndex]
+                dataStore.moveTaskToTrash(taskToTrash)
+                dataStore.tasks.remove(at: originalIndex)
+            }
+        }
     }
 }
 

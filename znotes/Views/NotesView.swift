@@ -10,12 +10,11 @@ import SwiftUI
 struct NotesView: View {
     @EnvironmentObject var dataStore: AppDataStore
     @State private var showAddSheet = false
-    @State private var searchText = ""
     
     var body: some View {
         NavigationView {
             List {
-                ForEach(searchResults) { note in
+                ForEach(dataStore.filteredNotes) { note in
                     NavigationLink {
                         NoteDetailView(note: note)
                     } label: {
@@ -24,7 +23,7 @@ struct NotesView: View {
                 }
                 .onDelete(perform: deleteNotes)
             }
-            .searchable(text: $searchText, prompt: "Search notes")
+            .searchable(text: $dataStore.searchText, prompt: "Search notes")
             .navigationTitle("Notes")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -41,20 +40,16 @@ struct NotesView: View {
         }
     }
     
-    var searchResults: [Note] {
-        if searchText.isEmpty {
-            return dataStore.notes
-        } else {
-            return dataStore.notes.filter { note in
-                note.title.localizedCaseInsensitiveContains(searchText) ||
-                note.content.localizedCaseInsensitiveContains(searchText) ||
-                note.tags.contains(where: { $0.localizedCaseInsensitiveContains(searchText) })
+    func deleteNotes(at offsets: IndexSet) {
+        // Move notes to trash instead of deleting them permanently
+        offsets.forEach { index in
+            let note = dataStore.filteredNotes[index]
+            if let originalIndex = dataStore.notes.firstIndex(where: { $0.id == note.id }) {
+                let noteToTrash = dataStore.notes[originalIndex]
+                dataStore.moveNoteToTrash(noteToTrash)
+                dataStore.notes.remove(at: originalIndex)
             }
         }
-    }
-    
-    func deleteNotes(at offsets: IndexSet) {
-        dataStore.deleteNote(at: offsets)
     }
 }
 
