@@ -1,44 +1,44 @@
 # iOS Notes Application
 
-Ứng dụng quản lý ghi chú và nhiệm vụ toàn diện được xây dựng bằng SwiftUI hiện đại.
+A comprehensive note-taking and task management application built with modern SwiftUI.
 
-## 🚀 Tính năng chính
+## 🚀 Main Features
 
-### 📝 Quản lý ghi chú (Notes)
-- Tạo, chỉnh sửa và xóa ghi chú cá nhân
-- Thêm tags để tổ chức
-- Tìm kiếm và lọc ghi chú
-- Giao diện thân thiện với người dùng
+### 📝 Notes Management
+- Create, edit, and delete personal notes
+- Add tags for organization
+- Search and filter notes
+- User-friendly interface
 
-### ✅ Quản lý nhiệm vụ (Tasks)
-- Tạo nhiệm vụ với các mức độ ưu tiên (Thấp, Trung bình, Cao, Khẩn cấp)
-- Theo dõi trạng thái nhiệm vụ (Cần làm, Đang tiến hành, Đang xem xét, Hoàn thành, Hủy bỏ)
-- Gán nhiệm vụ cho thành viên nhóm
-- Đặt hạn chót và theo dõi tiến độ
-- Thêm tags và mô tả chi tiết
+### ✅ Task Management
+- Create tasks with priority levels (Low, Medium, High, Critical)
+- Track task status (To Do, In Progress, In Review, Done, Cancelled)
+- Assign tasks to team members
+- Set deadlines and track progress
+- Add tags and detailed descriptions
 
-### 🚨 Theo dõi vấn đề (Issues)
-- Báo cáo và theo dõi các vấn đề với mô tả chi tiết
-- Quản lý vấn đề theo mức độ ưu tiên
-- Hệ thống bình luận để cộng tác
-- Theo dõi phân công và trạng thái
-- Phân loại bằng tags
+### 🚨 Issue Tracking
+- Report and track issues with detailed descriptions
+- Manage issues by priority
+- Comment system for collaboration
+- Track assignments and status
+- Categorize with tags
 
-### 👥 Quản lý phân công (Assignments)
-- Phân công nhiệm vụ và vấn đề cho thành viên nhóm
-- Theo dõi lịch sử phân công
-- Đặt hạn chót và ghi chú
-- Giám sát khối lượng công việc của nhóm
+### 👥 Assignment Management
+- Assign tasks and issues to team members
+- Track assignment history
+- Set deadlines and notes
+- Monitor team workload
 
-## 🏗️ Kiến trúc kỹ thuật
+## 🏗️ Technical Architecture
 
-### Công nghệ sử dụng
-- **SwiftUI**: Giao diện người dùng hiện đại
-- **Swift 6.1**: Ngôn ngữ lập trình mới nhất
-- **Combine Framework**: Quản lý state reactive
-- **Swift Package Manager**: Quản lý dependencies
+### Technologies Used
+- **SwiftUI**: Modern user interface
+- **Swift 6.1**: Latest programming language
+- **Combine Framework**: Reactive state management
+- **Swift Package Manager**: Dependencies management
 
-### Cấu trúc dự án
+### Project Structure
 ```
 Sources/
 ├── iOSNotesCore/           # Core library
@@ -61,41 +61,41 @@ Tests/                      # Unit tests
     └── iOSNotesTests.swift
 ```
 
-### Mô hình dữ liệu
-Tất cả các models đều tuân thủ `Identifiable`, `Codable`, và `Sendable`:
+### Data Models
+All models conform to `Identifiable`, `Codable`, and `Sendable`:
 
-- **Note**: Ghi chú cá nhân với tiêu đề, nội dung và tags
-- **Task**: Nhiệm vụ công việc với phân công và ưu tiên
-- **Issue**: Vấn đề/bug với bình luận và theo dõi
-- **Assignment**: Phân công nhiệm vụ/vấn đề cho người
-- **Person**: Thông tin thành viên nhóm
+- **Note**: Personal notes with title, content and tags
+- **Task**: Work tasks with assignments and priorities
+- **Issue**: Problems/bugs with comments and tracking
+- **Assignment**: Task/issue assignments to people
+- **Person**: Team member information
 
-## 📱 Giao diện người dùng
+## 📱 User Interface
 
-### Thiết kế TabView
-Ứng dụng sử dụng `TabView` với 4 tab chính:
+### TabView Design
+The application uses a `TabView` with 4 main tabs:
 
-1. **Notes** (📝): Quản lý ghi chú cá nhân
-2. **Tasks** (✅): Quản lý nhiệm vụ và deadline
-3. **Issues** (🚨): Theo dõi và báo cáo vấn đề
-4. **Assignments** (👥): Phân công công việc
+1. **Notes** (📝): Manage personal notes
+2. **Tasks** (✅): Manage tasks and deadlines
+3. **Issues** (🚨): Track and report issues
+4. **Assignments** (👥): Manage work assignments
 
-### Tính năng UI
-- Navigation dựa trên tabs
-- Tìm kiếm và lọc dữ liệu
+### UI Features
+- Tab-based navigation
+- Search and filter data
 - Pull-to-refresh
 - Swipe-to-delete
-- Modal forms cho thêm/chỉnh sửa
-- Responsive design cho các kích thước màn hình khác nhau
+- Modal forms for adding/editing
+- Responsive design for different screen sizes
 
-## 🛠️ Cài đặt và sử dụng
+## 🛠️ Installation and Usage
 
-### Yêu cầu hệ thống
+### System Requirements
 - iOS 15.0+ / macOS 12.0+
 - Xcode 13.0+
 - Swift 6.1+
 
-### Cài đặt
+### Installation
 ```bash
 # Clone repository
 git clone https://github.com/ilmsadmin/ios_notes.git
@@ -111,7 +111,7 @@ swift run
 swift test
 ```
 
-### Sử dụng trong iOS App
+### Usage in iOS App
 ```swift
 import SwiftUI
 import iOSNotesCore
@@ -128,54 +128,54 @@ struct YourApp: App {
 
 ## 🧪 Testing
 
-Dự án bao gồm comprehensive test suite:
+The project includes a comprehensive test suite:
 
 ```bash
 swift test
 ```
 
-Tests bao gồm:
-- CRUD operations cho tất cả models
+Tests include:
+- CRUD operations for all models
 - State management
 - Data validation
 - Sample data loading
 
-Kết quả: **14 tests passed** ✅
+Results: **14 tests passed** ✅
 
 ## 📊 Demo
 
-Chạy demo để xem các tính năng:
+Run the demo to see the features:
 
 ```bash
 swift run
 ```
 
-Output hiển thị:
-- Tổng quan các tính năng ứng dụng
-- Dữ liệu mẫu (3 notes, 3 tasks, 3 issues, 3 assignments, 4 people)
-- Hướng dẫn tích hợp vào iOS project
+The output displays:
+- Overview of application features
+- Sample data (3 notes, 3 tasks, 3 issues, 3 assignments, 4 people)
+- Integration guide for iOS projects
 
-## 📚 Tài liệu
+## 📚 Documentation
 
-- [Documentation.md](Documentation.md): Tài liệu API chi tiết
-- [Design.md](Design.md): Thiết kế kiến trúc và UI/UX
+- [Documentation.md](Documentation.md): Detailed API documentation
+- [Design.md](Design.md): Architecture and UI/UX design
 
-## 🎯 Tính năng nổi bật
+## 🎯 Key Features
 
-### Hệ thống ưu tiên
-- **Thấp**: Cải tiến nhỏ hoặc không khẩn cấp
-- **Trung bình**: Ưu tiên tiêu chuẩn
-- **Cao**: Cần chú ý ngay
-- **Khẩn cấp**: Cần xử lý tức thì
+### Priority System
+- **Low**: Minor improvements or non-urgent items
+- **Medium**: Standard priority
+- **High**: Needs immediate attention
+- **Critical**: Requires urgent handling
 
-### Theo dõi trạng thái
-- **Cần làm**: Chưa bắt đầu
-- **Đang tiến hành**: Đang được thực hiện
-- **Đang xem xét**: Chờ phê duyệt
-- **Hoàn thành**: Đã hoàn thành thành công
-- **Hủy bỏ**: Không còn cần thiết
+### Status Tracking
+- **To Do**: Not yet started
+- **In Progress**: Currently being worked on
+- **In Review**: Waiting for approval
+- **Done**: Successfully completed
+- **Cancelled**: No longer needed
 
-### Quản lý state hiện đại
+### Modern State Management
 ```swift
 @MainActor
 class AppDataStore: ObservableObject {
@@ -187,39 +187,39 @@ class AppDataStore: ObservableObject {
 }
 ```
 
-## 🚀 Khả năng mở rộng
+## 🚀 Scalability
 
-Thiết kế modular hỗ trợ thêm:
-- Tích hợp lịch
-- Đính kèm file
-- Tính năng cộng tác
-- Tìm kiếm nâng cao
-- Workflows tùy chỉnh
-- Đồng bộ cloud
+The modular design supports adding:
+- Calendar integration
+- File attachments
+- Collaboration features
+- Advanced search
+- Custom workflows
+- Cloud synchronization
 - Offline support
 
-## 🔒 Bảo mật
+## 🔒 Security
 
-- Mã hóa dữ liệu cục bộ
-- Lưu trữ keychain an toàn
-- Thiết kế ưu tiên privacy
+- Local data encryption
+- Secure keychain storage
+- Privacy-first design
 
 ## 📄 License
 
-Dự án này có sẵn dưới giấy phép MIT.
+This project is available under the MIT license.
 
-## 💡 Đóng góp
+## 💡 Contributing
 
-1. Fork repository
-2. Tạo feature branch
-3. Thực hiện changes
-4. Thêm tests nếu cần
-5. Submit pull request
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if needed
+5. Submit a pull request
 
-## 📞 Hỗ trợ
+## 📞 Support
 
-Để được hỗ trợ hoặc báo cáo vấn đề, vui lòng tạo issue trong repository.
+For support or issue reporting, please create an issue in the repository.
 
 ---
 
-✨ **Được xây dựng với SwiftUI và các practices phát triển iOS hiện đại!** ✨
+✨ **Built with SwiftUI and modern iOS development practices!** ✨
