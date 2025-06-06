@@ -8,14 +8,31 @@
 import SwiftUI
 
 struct ContentView: View {
+    @StateObject private var dataStore = AppDataStore(loadSampleData: true)
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        TabView {
+            NotesView()
+                .tabItem {
+                    Label("Notes", systemImage: "note.text")
+                }
+            
+            TasksView()
+                .tabItem {
+                    Label("Tasks", systemImage: "checklist")
+                }
+            
+            IssuesView()
+                .tabItem {
+                    Label("Issues", systemImage: "exclamationmark.triangle")
+                }
+            
+            AssignmentsView()
+                .tabItem {
+                    Label("Assignments", systemImage: "person.2")
+                }
         }
-        .padding()
+        .environmentObject(dataStore)
     }
 }
 

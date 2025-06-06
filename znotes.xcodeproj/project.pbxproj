@@ -6,6 +6,12 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		9A0004F82DF34BA900E9C439 /* Documentation.md in Resources */ = {isa = PBXBuildFile; fileRef = 9A0004F52DF34BA900E9C439 /* Documentation.md */; };
+		9A0004F92DF34BA900E9C439 /* Design.md in Resources */ = {isa = PBXBuildFile; fileRef = 9A0004F42DF34BA900E9C439 /* Design.md */; };
+		9A0004FA2DF34BA900E9C439 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 9A0004F62DF34BA900E9C439 /* README.md */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		9A0004AE2DF34A3D00E9C439 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -27,6 +33,9 @@
 		9A0004A02DF34A3C00E9C439 /* znotes.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = znotes.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9A0004AD2DF34A3D00E9C439 /* znotesTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = znotesTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		9A0004B72DF34A3D00E9C439 /* znotesUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = znotesUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		9A0004F42DF34BA900E9C439 /* Design.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Design.md; sourceTree = "<group>"; };
+		9A0004F52DF34BA900E9C439 /* Documentation.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Documentation.md; sourceTree = "<group>"; };
+		9A0004F62DF34BA900E9C439 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -79,6 +88,7 @@
 				9A0004B02DF34A3D00E9C439 /* znotesTests */,
 				9A0004BA2DF34A3D00E9C439 /* znotesUITests */,
 				9A0004A12DF34A3C00E9C439 /* Products */,
+				9A0004F72DF34BA900E9C439 /* docs */,
 			);
 			sourceTree = "<group>";
 		};
@@ -90,6 +100,16 @@
 				9A0004B72DF34A3D00E9C439 /* znotesUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		9A0004F72DF34BA900E9C439 /* docs */ = {
+			isa = PBXGroup;
+			children = (
+				9A0004F42DF34BA900E9C439 /* Design.md */,
+				9A0004F52DF34BA900E9C439 /* Documentation.md */,
+				9A0004F62DF34BA900E9C439 /* README.md */,
+			);
+			path = docs;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -212,6 +232,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9A0004F82DF34BA900E9C439 /* Documentation.md in Resources */,
+				9A0004F92DF34BA900E9C439 /* Design.md in Resources */,
+				9A0004FA2DF34BA900E9C439 /* README.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -395,6 +418,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 22H5GDTG34;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -422,6 +446,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 22H5GDTG34;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
