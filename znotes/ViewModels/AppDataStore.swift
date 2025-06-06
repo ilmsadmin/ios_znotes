@@ -11,11 +11,18 @@ import Combine
 
 @MainActor
 class AppDataStore: ObservableObject {
+    // MARK: - Published Properties
     @Published var notes: [Note] = []
     @Published var tasks: [Task] = []
     @Published var issues: [Issue] = []
     @Published var assignments: [Assignment] = []
     @Published var people: [Person] = []
+    
+    // Trash bin storage
+    @Published var trashedNotes: [Note] = []
+    @Published var trashedTasks: [Task] = []
+    @Published var trashedIssues: [Issue] = []
+    @Published var showTrashBin = false
     
     @Published var searchText: String = ""
     
@@ -157,7 +164,7 @@ class AppDataStore: ObservableObject {
         if searchText.isEmpty {
             return notes
         } else {
-            return notes.filter { 
+            return notes.filter {
                 $0.title.localizedCaseInsensitiveContains(searchText) ||
                 $0.content.localizedCaseInsensitiveContains(searchText) ||
                 $0.tags.contains(where: { $0.localizedCaseInsensitiveContains(searchText) })
@@ -185,6 +192,119 @@ class AppDataStore: ObservableObject {
                 $0.title.localizedCaseInsensitiveContains(searchText) ||
                 $0.description.localizedCaseInsensitiveContains(searchText) ||
                 $0.tags.contains(where: { $0.localizedCaseInsensitiveContains(searchText) })
+            }
+        }
+    }
+    
+    // MARK: - Trash Management
+    // Helper properties for trash status
+    var hasTrashItems: Bool {
+        return !trashedNotes.isEmpty || !trashedTasks.isEmpty || !trashedIssues.isEmpty
+    }
+    
+    var totalTrashCount: Int {
+        return trashedNotes.count + trashedTasks.count + trashedIssues.count
+    }
+    
+    func emptyTrash() {
+        trashedNotes.removeAll()
+        trashedTasks.removeAll()
+        trashedIssues.removeAll()
+    }
+    
+    // Note trash operations
+    func moveNoteToTrash(_ note: Note) {
+        var trashedNote = note
+        trashedNote.trashedDate = Date()
+        trashedNotes.append(trashedNote)
+    }
+    
+    func restoreNoteFromTrash(_ note: Note) {
+        if let index = trashedNotes.firstIndex(where: { $0.id == note.id }) {
+            var restoredNote = trashedNotes[index]
+            restoredNote.trashedDate = nil
+            notes.append(restoredNote)
+            trashedNotes.remove(at: index)
+        }
+    }
+    
+    func permanentlyDeleteNote(_ note: Note) {
+        trashedNotes.removeAll { $0.id == note.id }
+    }
+    
+    // Task trash operations
+    func moveTaskToTrash(_ task: Task) {
+        var trashedTask = task
+        trashedTask.trashedDate = Date()
+        trashedTasks.append(trashedTask)
+    }
+    
+    func restoreTaskFromTrash(_ task: Task) {
+        if let index = trashedTasks.firstIndex(where: { $0.id == task.id }) {
+            var restoredTask = trashedTasks[index]
+            restoredTask.trashedDate = nil
+            tasks.append(restoredTask)
+            trashedTasks.remove(at: index)
+        }
+    }
+    
+    func permanentlyDeleteTask(_ task: Task) {
+        trashedTasks.removeAll { $0.id == task.id }
+    }
+    
+    // Issue trash operations
+    func moveIssueToTrash(_ issue: Issue) {
+        var trashedIssue = issue
+        trashedIssue.trashedDate = Date()
+        trashedIssues.append(trashedIssue)
+    }
+    
+    func restoreIssueFromTrash(_ issue: Issue) {
+        if let index = trashedIssues.firstIndex(where: { $0.id == issue.id }) {
+            var restoredIssue = trashedIssues[index]
+            restoredIssue.trashedDate = nil
+            issues.append(restoredIssue)
+            trashedIssues.remove(at: index)
+        }
+    }
+    
+    func permanentlyDeleteIssue(_ issue: Issue) {
+        trashedIssues.removeAll { $0.id == issue.id }
+    }
+    
+    // MARK: - Filtered Trash Results
+    var filteredTrashedNotes: [Note] {
+        if searchText.isEmpty {
+            return trashedNotes
+        } else {
+            return trashedNotes.filter { note in
+                note.title.localizedCaseInsensitiveContains(searchText) ||
+                note.content.localizedCaseInsensitiveContains(searchText) ||
+                note.tags.contains(where: { $0.localizedCaseInsensitiveContains(searchText) })
+            }
+        }
+    }
+    
+    var filteredTrashedTasks: [Task] {
+        if searchText.isEmpty {
+            return trashedTasks
+        } else {
+            return trashedTasks.filter { task in
+                task.title.localizedCaseInsensitiveContains(searchText) ||
+                task.description.localizedCaseInsensitiveContains(searchText) ||
+                task.tags.contains(where: { $0.localizedCaseInsensitiveContains(searchText) })
+            }
+        }
+    }
+    
+    var filteredTrashedIssues: [Issue] {
+        if searchText.isEmpty {
+            return trashedIssues
+        } else {
+            return trashedIssues.filter { issue in
+                issue.title.localizedCaseInsensitiveContains(searchText) ||
+                issue.description.localizedCaseInsensitiveContains(searchText) ||
+                issue.tags.contains(where: { $0.localizedCaseInsensitiveContains(searchText) })
             }
         }
     }

@@ -15,6 +15,7 @@ struct Note: Identifiable, Codable, Hashable, Sendable {
     var tags: [String] = []
     var createdAt: Date = Date()
     var updatedAt: Date = Date()
+    var trashedDate: Date? = nil
     
     static var sampleData: [Note] {
         [

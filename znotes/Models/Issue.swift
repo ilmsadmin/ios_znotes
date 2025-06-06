@@ -27,6 +27,7 @@ struct Issue: Identifiable, Codable, Hashable, Sendable {
     var comments: [Comment] = []
     var createdAt: Date = Date()
     var updatedAt: Date = Date()
+    var trashedDate: Date? = nil
     
     static var sampleData: [Issue] {
         [

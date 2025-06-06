@@ -57,6 +57,7 @@ struct Task: Identifiable, Codable, Hashable, Sendable {
     var assigneeID: UUID?
     var createdAt: Date = Date()
     var updatedAt: Date = Date()
+    var trashedDate: Date? = nil
     
     static var sampleData: [Task] {
         [
