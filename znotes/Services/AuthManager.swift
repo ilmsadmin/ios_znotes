@@ -34,8 +34,11 @@ class AuthManager: ObservableObject {
     
     private init() {
         // Load saved token on init
-        accessToken = keychain.load("access_token")
-        if accessToken != nil {
+        if let savedToken = keychain.load("access_token") {
+            accessToken = savedToken
+            // Set initial state to authenticating while loading profile
+            authState = .authenticating
+            // Load user profile in the background
             Task {
                 await loadUserProfile()
             }

@@ -10,36 +10,7 @@ import SwiftUI
 struct DashboardView: View {
     @EnvironmentObject private var dataStore: AppDataStore
     @State private var searchText: String = ""
-    
-    // Add state variables for new item sheets
-    @State private var showingNewNoteSheet = false
-    @State private var showingNewTaskSheet = false
-    @State private var showingNewIssueSheet = false
-    @State private var showingNewAssignmentSheet = false
-    
-    // New item state variables
-    @State private var newNoteTitle = ""
-    @State private var newNoteContent = ""
-    
-    @State private var newTaskTitle = ""
-    @State private var newTaskDescription = ""
-    @State private var newTaskPriority = Priority.medium
-    @State private var newTaskStatus = TaskStatus.todo
-    @State private var newTaskDueDate = Date()
-    @State private var newTaskHasDueDate = false
-    
-    @State private var newIssueTitle = ""
-    @State private var newIssueDescription = ""
-    @State private var newIssuePriority = Priority.medium
-    @State private var newIssueStatus = TaskStatus.todo
-    @State private var newIssueReporterID: UUID? // New state variable for reporter ID
-    
-    @State private var newAssignmentType = AssignmentType.task
-    @State private var newAssignmentItemID: UUID?
-    @State private var newAssignmentPersonID: UUID?
-    @State private var newAssignmentDueDate = Date()
-    @State private var newAssignmentHasDueDate = false
-    @State private var newAssignmentNotes = ""
+    @State private var showingLoginView = false
     
     private let columns = [
         GridItem(.adaptive(minimum: 160, maximum: 180), spacing: 16)
@@ -68,64 +39,17 @@ struct DashboardView: View {
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Menu {
-                        Section("Create New") {
-                            Button(action: {
-                                showingNewNoteSheet.toggle()
-                            }) {
-                                Label("New Note", systemImage: "note.text.badge.plus")
-                            }
-                            
-                            Button(action: {
-                                showingNewTaskSheet.toggle()
-                            }) {
-                                Label("New Task", systemImage: "checklist.badge.plus")
-                            }
-                            
-                            Button(action: {
-                                showingNewIssueSheet.toggle()
-                            }) {
-                                Label("New Issue", systemImage: "exclamationmark.triangle.badge.plus")
-                            }
-                            
-                            Button(action: {
-                                showingNewAssignmentSheet.toggle()
-                            }) {
-                                Label("New Assignment", systemImage: "person.2.badge.plus")
-                            }
-                        }
-                        
-                        Section("Account") {
-                            Button(action: {
-                                // Show profile
-                            }) {
-                                Label("Profile", systemImage: "person.circle")
-                            }
-                            
-                            Button(action: {
-                                // Show settings
-                            }) {
-                                Label("Settings", systemImage: "gearshape")
-                            }
-                        }
-                    } label: {
-                        Image(systemName: "person.crop.circle")
+                    Button(action: {
+                        showingLoginView = true
+                    }) {
+                        Image(systemName: "person.circle")
                             .font(.title2)
                     }
                 }
             }
         }
-        .sheet(isPresented: $showingNewNoteSheet) {
-            NoteFormView(mode: .add)
-        }
-        .sheet(isPresented: $showingNewTaskSheet) {
-            TaskFormView(mode: .add)
-        }
-        .sheet(isPresented: $showingNewIssueSheet) {
-            IssueFormView(mode: .add)
-        }
-        .sheet(isPresented: $showingNewAssignmentSheet) {
-            AssignmentFormView(mode: .add)
+        .sheet(isPresented: $showingLoginView) {
+            LoginView()
         }
     }
     
