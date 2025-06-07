@@ -61,7 +61,7 @@ struct TasksView: View {
         }
     }
     
-    var filteredTasks: [Task] {
+    var filteredTasks: [TaskItem] {
         var tasks = dataStore.tasks
         
         // Apply status filter if selected
@@ -105,27 +105,10 @@ struct TasksView: View {
     }
 }
 
-struct FilterButton: View {
-    let title: String
-    let isSelected: Bool
-    let action: () -> Void
-    
-    var body: some View {
-        Button(action: action) {
-            Text(title)
-                .fontWeight(isSelected ? .bold : .regular)
-                .padding(.vertical, 8)
-                .padding(.horizontal, 16)
-                .background(isSelected ? Color.blue.opacity(0.2) : Color.gray.opacity(0.1))
-                .cornerRadius(8)
-        }
-        .buttonStyle(PlainButtonStyle())
-    }
-}
 
 struct TaskRowView: View {
     @EnvironmentObject var dataStore: AppDataStore
-    let task: Task
+    let task: TaskItem
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -159,7 +142,7 @@ struct TaskRowView: View {
                 }
             }
             
-            if let assigneeID = task.assigneeID, let person = dataStore.getPerson(with: assigneeID) {
+            if let assigneeId = task.assigneeId, let person = dataStore.getPerson(with: assigneeId) {
                 HStack {
                     Image(systemName: person.profileImage ?? "person")
                     Text("Assigned to: \(person.name)")
@@ -189,7 +172,7 @@ struct TaskRowView: View {
 struct TaskDetailView: View {
     @EnvironmentObject var dataStore: AppDataStore
     @State private var showEditSheet = false
-    let task: Task
+    let task: TaskItem
     
     var body: some View {
         ScrollView {
@@ -221,7 +204,7 @@ struct TaskDetailView: View {
                 }
                 
                 // Assignee
-                if let assigneeID = task.assigneeID, let person = dataStore.getPerson(with: assigneeID) {
+                if let assigneeId = task.assigneeId, let person = dataStore.getPerson(with: assigneeId) {
                     HStack {
                         Image(systemName: person.profileImage ?? "person")
                         Text("Assigned to: \(person.name) (\(person.role))")
@@ -299,7 +282,7 @@ struct TaskFormView: View {
     @EnvironmentObject var dataStore: AppDataStore
     @Environment(\.dismiss) private var dismiss
     
-    let mode: FormMode<Task>
+    let mode: FormMode<TaskItem>
     
     @State private var title = ""
     @State private var description = ""
@@ -308,7 +291,7 @@ struct TaskFormView: View {
     @State private var tagsText = ""
     @State private var dueDate: Date = Date().addingTimeInterval(86400) // Tomorrow
     @State private var hasDate = false
-    @State private var assigneeID: UUID?
+    @State private var assigneeID: String?
     
     var body: some View {
         NavigationView {
@@ -350,9 +333,9 @@ struct TaskFormView: View {
                 
                 Section(header: Text("Assignment")) {
                     Picker("Assigned To", selection: $assigneeID) {
-                        Text("Unassigned").tag(nil as UUID?)
+                        Text("Unassigned").tag(nil as String?)
                         ForEach(dataStore.people) { person in
-                            Text(person.name).tag(person.id as UUID?)
+                            Text(person.name).tag(person.id as String?)
                         }
                     }
                 }
@@ -405,7 +388,7 @@ struct TaskFormView: View {
             } else {
                 hasDate = false
             }
-            assigneeID = task.assigneeID
+            assigneeID = task.assigneeId
         }
     }
     
@@ -417,14 +400,14 @@ struct TaskFormView: View {
         
         switch mode {
         case .add:
-            let newTask = Task(
+            let newTask = TaskItem(
                 title: title,
                 description: description,
                 priority: priority,
                 status: status,
                 tags: tags,
                 dueDate: hasDate ? dueDate : nil,
-                assigneeID: assigneeID
+                assigneeId: assigneeID
             )
             dataStore.addTask(newTask)
             
@@ -436,21 +419,9 @@ struct TaskFormView: View {
             updatedTask.status = status
             updatedTask.tags = tags
             updatedTask.dueDate = hasDate ? dueDate : nil
-            updatedTask.assigneeID = assigneeID
+            updatedTask.assigneeId = assigneeID
             updatedTask.updatedAt = Date()
             dataStore.updateTask(updatedTask)
-        }
-    }
-}
-
-// Thêm extension để giúp sắp xếp theo mức độ ưu tiên
-extension Priority {
-    var priorityValue: Int {
-        switch self {
-        case .low: return 0
-        case .medium: return 1
-        case .high: return 2
-        case .critical: return 3
         }
     }
 }

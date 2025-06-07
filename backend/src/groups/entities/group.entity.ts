@@ -12,7 +12,6 @@ import {
 import { User } from '../../users/entities/user.entity';
 
 @Entity('groups')
-@Index(['domain'], { unique: true })
 export class Group {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -21,7 +20,6 @@ export class Group {
   name: string;
 
   @Column({ length: 100, unique: true })
-  @Index()
   domain: string;
 
   @Column({ type: 'text', nullable: true })

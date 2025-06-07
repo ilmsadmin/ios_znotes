@@ -50,7 +50,7 @@ struct TrashBinView: View {
                 Text("Are you sure you want to permanently delete all items in the trash? This action cannot be undone.")
             }
         }
-        .onChange(of: searchText) { newValue in
+        .onChange(of: searchText) { _, newValue in
             dataStore.searchText = newValue
         }
     }
@@ -244,7 +244,7 @@ struct TrashedNoteRow: View {
 struct TrashedTaskRow: View {
     // MARK: - Properties
     @EnvironmentObject private var dataStore: AppDataStore
-    let task: Task
+    let task: TaskItem
     @State private var showingRestoreAlert = false
     @State private var showingDeleteAlert = false
     

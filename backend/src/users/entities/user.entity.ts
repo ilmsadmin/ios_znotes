@@ -23,7 +23,6 @@ export enum UserRole {
 }
 
 @Entity('users')
-@Index(['email'], { unique: true })
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -32,7 +31,6 @@ export class User {
   name: string;
 
   @Column({ length: 255, unique: true })
-  @Index()
   email: string;
 
   @Column({ length: 255 })

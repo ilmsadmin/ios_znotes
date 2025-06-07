@@ -6,47 +6,65 @@
 //
 
 import Foundation
-import SwiftUI
 
-enum AssignmentType: String, Codable, CaseIterable, Identifiable {
+enum AssignmentType: String, CaseIterable, Codable, Identifiable {
     case task = "Task"
     case issue = "Issue"
     
-    var id: String { self.rawValue }
+    var id: String { rawValue }
 }
 
 struct Assignment: Identifiable, Codable, Hashable, Sendable {
-    var id: UUID = UUID()
+    var id: String
     var type: AssignmentType
-    var itemID: UUID // ID của Task hoặc Issue
-    var personID: UUID
+    var itemId: String  // ID of the Task or Issue being assigned
+    var personId: String  // ID of the person assigned
     var dueDate: Date?
     var notes: String?
-    var createdAt: Date = Date()
-    var updatedAt: Date = Date()
+    var createdById: String
+    var createdAt: Date
+    var updatedAt: Date
+    
+    init(id: String = UUID().uuidString, type: AssignmentType, itemId: String, personId: String, dueDate: Date? = nil, notes: String? = nil, createdById: String, createdAt: Date = Date(), updatedAt: Date = Date()) {
+        self.id = id
+        self.type = type
+        self.itemId = itemId
+        self.personId = personId
+        self.dueDate = dueDate
+        self.notes = notes
+        self.createdById = createdById
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+    }
     
     static var sampleData: [Assignment] {
         [
             Assignment(
+                id: "ASSIGNMENT-AAA-BBB-CCC-DDD",
                 type: .task,
-                itemID: Task.sampleData[0].id,
-                personID: Person.sampleData[0].id,
-                dueDate: Calendar.current.date(byAdding: .day, value: 3, to: Date()),
-                notes: "High priority task for the release"
+                itemId: "TASK-AAA-BBB-CCC-DDD",
+                personId: "123E4567-E89B-12D3-A456-426614174000",
+                dueDate: Calendar.current.date(byAdding: .day, value: 5, to: Date()),
+                notes: "High priority task for Q1 deliverable",
+                createdById: "CREATOR-AAA-BBB-CCC-DDD"
             ),
             Assignment(
-                type: .task,
-                itemID: Task.sampleData[1].id,
-                personID: Person.sampleData[1].id,
-                dueDate: Calendar.current.date(byAdding: .day, value: 7, to: Date()),
-                notes: "Required for App Store submission"
-            ),
-            Assignment(
+                id: "ASSIGNMENT-EEE-FFF-GGG-HHH",
                 type: .issue,
-                itemID: Issue.sampleData[0].id,
-                personID: Person.sampleData[0].id,
-                dueDate: Calendar.current.date(byAdding: .day, value: 1, to: Date()),
-                notes: "Critical issue affecting production"
+                itemId: "ISSUE-EEE-FFF-GGG-HHH",
+                personId: "123E4567-E89B-12D3-A456-426614174001",
+                dueDate: Calendar.current.date(byAdding: .day, value: 2, to: Date()),
+                notes: "Critical bug that needs immediate attention",
+                createdById: "CREATOR-EEE-FFF-GGG-HHH"
+            ),
+            Assignment(
+                id: "ASSIGNMENT-III-JJJ-KKK-LLL",
+                type: .task,
+                itemId: "TASK-III-JJJ-KKK-LLL",
+                personId: "123E4567-E89B-12D3-A456-426614174002",
+                dueDate: Calendar.current.date(byAdding: .day, value: 10, to: Date()),
+                notes: "Presentation for quarterly review meeting",
+                createdById: "CREATOR-III-JJJ-KKK-LLL"
             )
         ]
     }

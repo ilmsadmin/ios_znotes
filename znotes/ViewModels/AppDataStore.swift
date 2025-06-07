@@ -9,33 +9,147 @@ import Foundation
 import SwiftUI
 import Combine
 
+// MARK: - Date Extension for API
+extension Date {
+    var iso8601String: String {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return formatter.string(from: self)
+    }
+}
+
 @MainActor
 class AppDataStore: ObservableObject {
     // MARK: - Published Properties
     @Published var notes: [Note] = []
-    @Published var tasks: [Task] = []
+    @Published var tasks: [TaskItem] = []
     @Published var issues: [Issue] = []
     @Published var assignments: [Assignment] = []
     @Published var people: [Person] = []
     
     // Trash bin storage
     @Published var trashedNotes: [Note] = []
-    @Published var trashedTasks: [Task] = []
+    @Published var trashedTasks: [TaskItem] = []
     @Published var trashedIssues: [Issue] = []
     @Published var showTrashBin = false
     
     @Published var searchText: String = ""
     
+    // Loading states
+    @Published var isLoadingNotes = false
+    @Published var isLoadingTasks = false
+    @Published var isLoadingIssues = false
+    @Published var isLoadingAssignments = false
+    @Published var isLoadingPeople = false
+    
+    // Error handling
+    @Published var errorMessage: String?
+    
+    private let apiService = APIService.shared
+    
+    // Date formatter for API calls
+    private let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
+        return formatter
+    }()
+    
     init(loadSampleData: Bool = true) {
         if loadSampleData {
             loadSample()
+        } else {
+            // Load data from API when user is authenticated
+            Task {
+                await loadAllData()
+            }
         }
+    }
+    
+    // MARK: - API Data Loading
+    func loadAllData() async {
+        await withTaskGroup(of: Void.self) { group in
+            group.addTask { await self.loadNotes() }
+            group.addTask { await self.loadTasks() }
+            group.addTask { await self.loadIssues() }
+            group.addTask { await self.loadAssignments() }
+            group.addTask { await self.loadPeople() }
+        }
+    }
+    
+    func loadNotes() async {
+        isLoadingNotes = true
+        errorMessage = nil
+        
+        do {
+            let fetchedNotes = try await apiService.fetchNotes()
+            notes = fetchedNotes
+        } catch {
+            errorMessage = "Failed to load notes: \(error.localizedDescription)"
+        }
+        
+        isLoadingNotes = false
+    }
+    
+    func loadTasks() async {
+        isLoadingTasks = true
+        errorMessage = nil
+        
+        do {
+            let fetchedTasks = try await apiService.fetchTasks()
+            tasks = fetchedTasks
+        } catch {
+            errorMessage = "Failed to load tasks: \(error.localizedDescription)"
+        }
+        
+        isLoadingTasks = false
+    }
+    
+    func loadIssues() async {
+        isLoadingIssues = true
+        errorMessage = nil
+        
+        do {
+            let fetchedIssues = try await apiService.fetchIssues()
+            issues = fetchedIssues
+        } catch {
+            errorMessage = "Failed to load issues: \(error.localizedDescription)"
+        }
+        
+        isLoadingIssues = false
+    }
+    
+    func loadAssignments() async {
+        isLoadingAssignments = true
+        errorMessage = nil
+        
+        do {
+            let fetchedAssignments = try await apiService.fetchAssignments()
+            assignments = fetchedAssignments
+        } catch {
+            errorMessage = "Failed to load assignments: \(error.localizedDescription)"
+        }
+        
+        isLoadingAssignments = false
+    }
+    
+    func loadPeople() async {
+        isLoadingPeople = true
+        errorMessage = nil
+        
+        do {
+            let fetchedPeople = try await apiService.fetchUsers()
+            people = fetchedPeople
+        } catch {
+            errorMessage = "Failed to load people: \(error.localizedDescription)"
+        }
+        
+        isLoadingPeople = false
     }
     
     private func loadSample() {
         people = Person.sampleData
         notes = Note.sampleData
-        tasks = Task.sampleData
+        tasks = TaskItem.sampleData
         issues = Issue.sampleData
         assignments = Assignment.sampleData
     }
@@ -55,16 +169,16 @@ class AppDataStore: ObservableObject {
         notes.remove(atOffsets: indexSet)
     }
     
-    func deleteNote(with id: UUID) {
+    func deleteNote(with id: String) {
         notes.removeAll { $0.id == id }
     }
     
     // MARK: - Task Management
-    func addTask(_ task: Task) {
+    func addTask(_ task: TaskItem) {
         tasks.append(task)
     }
     
-    func updateTask(_ task: Task) {
+    func updateTask(_ task: TaskItem) {
         if let index = tasks.firstIndex(where: { $0.id == task.id }) {
             tasks[index] = task
         }
@@ -74,7 +188,7 @@ class AppDataStore: ObservableObject {
         tasks.remove(atOffsets: indexSet)
     }
     
-    func deleteTask(with id: UUID) {
+    func deleteTask(with id: String) {
         tasks.removeAll { $0.id == id }
     }
     
@@ -93,11 +207,11 @@ class AppDataStore: ObservableObject {
         issues.remove(atOffsets: indexSet)
     }
     
-    func deleteIssue(with id: UUID) {
+    func deleteIssue(with id: String) {
         issues.removeAll { $0.id == id }
     }
     
-    func addComment(to issueID: UUID, comment: Comment) {
+    func addComment(to issueID: String, comment: Comment) {
         if let index = issues.firstIndex(where: { $0.id == issueID }) {
             issues[index].comments.append(comment)
             issues[index].updatedAt = Date()
@@ -119,7 +233,7 @@ class AppDataStore: ObservableObject {
         assignments.remove(atOffsets: indexSet)
     }
     
-    func deleteAssignment(with id: UUID) {
+    func deleteAssignment(with id: String) {
         assignments.removeAll { $0.id == id }
     }
     
@@ -138,24 +252,24 @@ class AppDataStore: ObservableObject {
         people.remove(atOffsets: indexSet)
     }
     
-    func deletePerson(with id: UUID) {
+    func deletePerson(with id: String) {
         people.removeAll { $0.id == id }
     }
     
     // MARK: - Helpers
-    func getPerson(with id: UUID) -> Person? {
+    func getPerson(with id: String) -> Person? {
         return people.first(where: { $0.id == id })
     }
     
-    func getTask(with id: UUID) -> Task? {
+    func getTask(with id: String) -> TaskItem? {
         return tasks.first(where: { $0.id == id })
     }
     
-    func getIssue(with id: UUID) -> Issue? {
+    func getIssue(with id: String) -> Issue? {
         return issues.first(where: { $0.id == id })
     }
     
-    func getAssignment(with id: UUID) -> Assignment? {
+    func getAssignment(with id: String) -> Assignment? {
         return assignments.first(where: { $0.id == id })
     }
     
@@ -171,7 +285,7 @@ class AppDataStore: ObservableObject {
         }
     }
     
-    var filteredTasks: [Task] {
+    var filteredTasks: [TaskItem] {
         if searchText.isEmpty {
             return tasks
         }
@@ -235,13 +349,13 @@ class AppDataStore: ObservableObject {
     }
     
     // Task trash operations
-    func moveTaskToTrash(_ task: Task) {
+    func moveTaskToTrash(_ task: TaskItem) {
         var trashedTask = task
         trashedTask.trashedDate = Date()
         trashedTasks.append(trashedTask)
     }
     
-    func restoreTaskFromTrash(_ task: Task) {
+    func restoreTaskFromTrash(_ task: TaskItem) {
         if let index = trashedTasks.firstIndex(where: { $0.id == task.id }) {
             var restoredTask = trashedTasks[index]
             restoredTask.trashedDate = nil
@@ -250,7 +364,7 @@ class AppDataStore: ObservableObject {
         }
     }
     
-    func permanentlyDeleteTask(_ task: Task) {
+    func permanentlyDeleteTask(_ task: TaskItem) {
         trashedTasks.removeAll { $0.id == task.id }
     }
     
@@ -287,7 +401,7 @@ class AppDataStore: ObservableObject {
         }
     }
     
-    var filteredTrashedTasks: [Task] {
+    var filteredTrashedTasks: [TaskItem] {
         if searchText.isEmpty {
             return trashedTasks
         } else {
@@ -308,6 +422,183 @@ class AppDataStore: ObservableObject {
                 issue.description.localizedCaseInsensitiveContains(searchText) ||
                 issue.tags.contains(where: { $0.localizedCaseInsensitiveContains(searchText) })
             }
+        }
+    }
+    
+    // MARK: - Note Management (API-backed)
+    func addNote(_ note: Note) async {
+        do {
+            let request = CreateNoteRequest(
+                title: note.title,
+                content: note.content,
+                categoryId: nil // TODO: Add category support
+            )
+            let createdNote = try await apiService.createNote(request)
+            notes.append(createdNote)
+        } catch {
+            errorMessage = "Failed to create note: \(error.localizedDescription)"
+        }
+    }
+    
+    func updateNote(_ note: Note) async {
+        do {
+            let request = UpdateNoteRequest(
+                title: note.title,
+                content: note.content,
+                categoryId: nil
+            )
+            let updatedNote = try await apiService.updateNote(request, id: note.id)
+            if let index = notes.firstIndex(where: { $0.id == note.id }) {
+                notes[index] = updatedNote
+            }
+        } catch {
+            errorMessage = "Failed to update note: \(error.localizedDescription)"
+        }
+    }
+    
+    func deleteNote(with id: String) async {
+        do {
+            try await apiService.deleteNote(id: id)
+            notes.removeAll { $0.id == id }
+        } catch {
+            errorMessage = "Failed to delete note: \(error.localizedDescription)"
+        }
+    }
+    
+    // MARK: - Task Management (API-backed)
+    func addTask(_ task: TaskItem) async {
+        do {
+            let request = CreateTaskRequest(
+                title: task.title,
+                description: task.description,
+                priority: task.priority.rawValue,
+                status: task.status.rawValue,
+                tags: task.tags,
+                dueDate: task.dueDate?.iso8601String,
+                assigneeId: task.assigneeId
+            )
+            let createdTask = try await apiService.createTask(request)
+            tasks.append(createdTask)
+        } catch {
+            errorMessage = "Failed to create task: \(error.localizedDescription)"
+        }
+    }
+    
+    func updateTask(_ task: TaskItem) async {
+        do {
+            let request = UpdateTaskRequest(
+                title: task.title,
+                description: task.description,
+                priority: task.priority.rawValue,
+                status: task.status.rawValue,
+                tags: task.tags,
+                dueDate: task.dueDate?.iso8601String,
+                assigneeId: task.assigneeId
+            )
+            let updatedTask = try await apiService.updateTask(request, id: task.id)
+            if let index = tasks.firstIndex(where: { $0.id == task.id }) {
+                tasks[index] = updatedTask
+            }
+        } catch {
+            errorMessage = "Failed to update task: \(error.localizedDescription)"
+        }
+    }
+    
+    func deleteTask(with id: String) async {
+        do {
+            try await apiService.deleteTask(id: id)
+            tasks.removeAll { $0.id == id }
+        } catch {
+            errorMessage = "Failed to delete task: \(error.localizedDescription)"
+        }
+    }
+    
+    // MARK: - Issue Management (API-backed)
+    func addIssue(_ issue: Issue) async {
+        do {
+            let request = CreateIssueRequest(
+                title: issue.title,
+                description: issue.description,
+                priority: issue.priority.rawValue,
+                status: issue.status.rawValue,
+                tags: issue.tags,
+                reporterId: issue.reporterId,
+                assigneeId: issue.assigneeId
+            )
+            let createdIssue = try await apiService.createIssue(request)
+            issues.append(createdIssue)
+        } catch {
+            errorMessage = "Failed to create issue: \(error.localizedDescription)"
+        }
+    }
+    
+    func updateIssue(_ issue: Issue) async {
+        do {
+            let request = UpdateIssueRequest(
+                title: issue.title,
+                description: issue.description,
+                priority: issue.priority.rawValue,
+                status: issue.status.rawValue,
+                tags: issue.tags,
+                assigneeId: issue.assigneeId
+            )
+            let updatedIssue = try await apiService.updateIssue(request, id: issue.id)
+            if let index = issues.firstIndex(where: { $0.id == issue.id }) {
+                issues[index] = updatedIssue
+            }
+        } catch {
+            errorMessage = "Failed to update issue: \(error.localizedDescription)"
+        }
+    }
+    
+    func deleteIssue(with id: String) async {
+        do {
+            try await apiService.deleteIssue(id: id)
+            issues.removeAll { $0.id == id }
+        } catch {
+            errorMessage = "Failed to delete issue: \(error.localizedDescription)"
+        }
+    }
+    
+    // MARK: - Assignment Management (API-backed)
+    func addAssignment(_ assignment: Assignment) async {
+        do {
+            let request = CreateAssignmentRequest(
+                type: assignment.type.rawValue,
+                itemId: assignment.itemId,
+                personId: assignment.personId,
+                description: assignment.notes
+            )
+            let createdAssignment = try await apiService.createAssignment(request)
+            assignments.append(createdAssignment)
+        } catch {
+            errorMessage = "Failed to create assignment: \(error.localizedDescription)"
+        }
+    }
+    
+    func updateAssignment(_ assignment: Assignment) async {
+        do {
+            let request = UpdateAssignmentRequest(
+                type: assignment.type.rawValue,
+                itemId: assignment.itemId,
+                personId: assignment.personId,
+                description: assignment.notes
+            )
+            let updatedAssignment = try await apiService.updateAssignment(request, id: assignment.id)
+            if let index = assignments.firstIndex(where: { $0.id == assignment.id }) {
+                assignments[index] = updatedAssignment
+            }
+        } catch {
+            errorMessage = "Failed to update assignment: \(error.localizedDescription)"
+        }
+    }
+    
+    func deleteAssignment(with id: String) async {
+        do {
+            try await apiService.deleteAssignment(id: id)
+            assignments.removeAll { $0.id == id }
+        } catch {
+            errorMessage = "Failed to delete assignment: \(error.localizedDescription)"
         }
     }
 }

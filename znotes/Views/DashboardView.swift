@@ -69,43 +69,46 @@ struct DashboardView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Menu {
-                        Button(action: {
-                            // Action to create new note
-                            showingNewNoteSheet.toggle()
-                        }) {
-                            Label("New Note", systemImage: "note.text.badge.plus")
+                        Section("Create New") {
+                            Button(action: {
+                                showingNewNoteSheet.toggle()
+                            }) {
+                                Label("New Note", systemImage: "note.text.badge.plus")
+                            }
+                            
+                            Button(action: {
+                                showingNewTaskSheet.toggle()
+                            }) {
+                                Label("New Task", systemImage: "checklist.badge.plus")
+                            }
+                            
+                            Button(action: {
+                                showingNewIssueSheet.toggle()
+                            }) {
+                                Label("New Issue", systemImage: "exclamationmark.triangle.badge.plus")
+                            }
+                            
+                            Button(action: {
+                                showingNewAssignmentSheet.toggle()
+                            }) {
+                                Label("New Assignment", systemImage: "person.2.badge.plus")
+                            }
                         }
                         
-                        Button(action: {
-                            // Action to create new task
-                            showingNewTaskSheet.toggle()
-                        }) {
-                            Label("New Task", systemImage: "checklist.badge.plus")
-                        }
-                        
-                        Button(action: {
-                            // Action to create new issue
-                            showingNewIssueSheet.toggle()
-                        }) {
-                            Label("New Issue", systemImage: "exclamationmark.triangle.badge.plus")
-                        }
-                        
-                        Button(action: {
-                            // Action to create new assignment
-                            showingNewAssignmentSheet.toggle()
-                        }) {
-                            Label("New Assignment", systemImage: "person.2.badge.plus")
+                        Section("Account") {
+                            Button(action: {
+                                // Show profile
+                            }) {
+                                Label("Profile", systemImage: "person.circle")
+                            }
+                            
+                            Button(action: {
+                                // Show settings
+                            }) {
+                                Label("Settings", systemImage: "gearshape")
+                            }
                         }
                     } label: {
-                        Image(systemName: "plus.circle.fill")
-                            .font(.title2)
-                    }
-                }
-                
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {
-                        // Show profile or settings
-                    }) {
                         Image(systemName: "person.crop.circle")
                             .font(.title2)
                     }

@@ -158,11 +158,6 @@ struct NoteDetailView: View {
     }
 }
 
-enum FormMode<T> {
-    case add
-    case edit(T)
-}
-
 struct NoteFormView: View {
     @EnvironmentObject var dataStore: AppDataStore
     @Environment(\.dismiss) private var dismiss

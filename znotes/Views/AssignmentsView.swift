@@ -12,7 +12,7 @@ struct AssignmentsView: View {
     @State private var showAddSheet = false
     @State private var searchText = ""
     @State private var selectedType: AssignmentType?
-    @State private var selectedPersonID: UUID?
+    @State private var selectedPersonID: String?
     
     var body: some View {
         NavigationView {
@@ -90,7 +90,7 @@ struct AssignmentsView: View {
         
         // Apply person filter
         if let personID = selectedPersonID {
-            assignments = assignments.filter { $0.personID == personID }
+            assignments = assignments.filter { $0.personId == personID }
         }
         
         // Apply search filter
@@ -103,19 +103,19 @@ struct AssignmentsView: View {
                 // Search in related task/issue
                 switch assignment.type {
                 case .task:
-                    if let task = dataStore.getTask(with: assignment.itemID) {
+                    if let task = dataStore.getTask(with: assignment.itemId) {
                         return task.title.localizedCaseInsensitiveContains(searchText) ||
                                task.description.localizedCaseInsensitiveContains(searchText)
                     }
                 case .issue:
-                    if let issue = dataStore.getIssue(with: assignment.itemID) {
+                    if let issue = dataStore.getIssue(with: assignment.itemId) {
                         return issue.title.localizedCaseInsensitiveContains(searchText) ||
                                issue.description.localizedCaseInsensitiveContains(searchText)
                     }
                 }
                 
                 // Search in person name
-                if let person = dataStore.getPerson(with: assignment.personID) {
+                if let person = dataStore.getPerson(with: assignment.personId) {
                     return person.name.localizedCaseInsensitiveContains(searchText)
                 }
                 
@@ -179,7 +179,7 @@ struct AssignmentRowView: View {
             }
             
             // Person info
-            if let person = dataStore.getPerson(with: assignment.personID) {
+            if let person = dataStore.getPerson(with: assignment.personId) {
                 HStack {
                     Image(systemName: person.profileImage ?? "person")
                     Text("Assigned to: \(person.name)")
@@ -216,27 +216,27 @@ struct AssignmentRowView: View {
     private func getItemTitle() -> String? {
         switch assignment.type {
         case .task:
-            return dataStore.getTask(with: assignment.itemID)?.title
+            return dataStore.getTask(with: assignment.itemId)?.title
         case .issue:
-            return dataStore.getIssue(with: assignment.itemID)?.title
+            return dataStore.getIssue(with: assignment.itemId)?.title
         }
     }
     
     private func getItemStatus() -> TaskStatus? {
         switch assignment.type {
         case .task:
-            return dataStore.getTask(with: assignment.itemID)?.status
+            return dataStore.getTask(with: assignment.itemId)?.status
         case .issue:
-            return dataStore.getIssue(with: assignment.itemID)?.status
+            return dataStore.getIssue(with: assignment.itemId)?.status
         }
     }
     
     private func getItemPriority() -> Priority? {
         switch assignment.type {
         case .task:
-            return dataStore.getTask(with: assignment.itemID)?.priority
+            return dataStore.getTask(with: assignment.itemId)?.priority
         case .issue:
-            return dataStore.getIssue(with: assignment.itemID)?.priority
+            return dataStore.getIssue(with: assignment.itemId)?.priority
         }
     }
 }
@@ -265,7 +265,7 @@ struct AssignmentDetailView: View {
                 }
                 
                 // Person details
-                if let person = dataStore.getPerson(with: assignment.personID) {
+                if let person = dataStore.getPerson(with: assignment.personId) {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Assigned To")
                             .font(.headline)
@@ -298,7 +298,7 @@ struct AssignmentDetailView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     switch assignment.type {
                     case .task:
-                        if let task = dataStore.getTask(with: assignment.itemID) {
+                        if let task = dataStore.getTask(with: assignment.itemId) {
                             TaskDetailSection(task: task)
                         } else {
                             Text("Task not found")
@@ -306,7 +306,7 @@ struct AssignmentDetailView: View {
                                 .foregroundColor(.secondary)
                         }
                     case .issue:
-                        if let issue = dataStore.getIssue(with: assignment.itemID) {
+                        if let issue = dataStore.getIssue(with: assignment.itemId) {
                             IssueDetailSection(issue: issue)
                         } else {
                             Text("Issue not found")
@@ -379,7 +379,7 @@ struct AssignmentDetailView: View {
 }
 
 struct TaskDetailSection: View {
-    let task: Task
+    let task: TaskItem
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -446,14 +446,14 @@ struct AssignmentFormView: View {
     let mode: FormMode<Assignment>
     
     @State private var type = AssignmentType.task
-    @State private var itemID: UUID?
-    @State private var personID: UUID?
+    @State private var itemId: String?
+    @State private var personId: String?
     @State private var dueDate: Date = Date().addingTimeInterval(86400) // Tomorrow
     @State private var hasDate = false
     @State private var notes = ""
     
     // Task and issue lists for selection
-    private var tasks: [Task] { dataStore.tasks }
+    private var tasks: [TaskItem] { dataStore.tasks }
     private var issues: [Issue] { dataStore.issues }
     
     var body: some View {
@@ -471,27 +471,27 @@ struct AssignmentFormView: View {
                 Section(header: Text("Item")) {
                     switch type {
                     case .task:
-                        Picker("Select Task", selection: $itemID) {
-                            Text("Select a task").tag(nil as UUID?)
+                        Picker("Select Task", selection: $itemId) {
+                            Text("Select a task").tag(nil as String?)
                             ForEach(tasks) { task in
-                                Text(task.title).tag(task.id as UUID?)
+                                Text(task.title).tag(task.id as String?)
                             }
                         }
                     case .issue:
-                        Picker("Select Issue", selection: $itemID) {
-                            Text("Select an issue").tag(nil as UUID?)
+                        Picker("Select Issue", selection: $itemId) {
+                            Text("Select an issue").tag(nil as String?)
                             ForEach(issues) { issue in
-                                Text(issue.title).tag(issue.id as UUID?)
+                                Text(issue.title).tag(issue.id as String?)
                             }
                         }
                     }
                 }
                 
                 Section(header: Text("Assignee")) {
-                    Picker("Assigned To", selection: $personID) {
-                        Text("Select a person").tag(nil as UUID?)
+                    Picker("Assigned To", selection: $personId) {
+                        Text("Select a person").tag(nil as String?)
                         ForEach(dataStore.people) { person in
-                            Text(person.name).tag(person.id as UUID?)
+                            Text(person.name).tag(person.id as String?)
                         }
                     }
                 }
@@ -523,7 +523,7 @@ struct AssignmentFormView: View {
                         saveAssignment()
                         dismiss()
                     }
-                    .disabled(itemID == nil || personID == nil)
+                    .disabled(itemId == nil || personId == nil)
                 }
             }
             .onAppear {
@@ -547,8 +547,8 @@ struct AssignmentFormView: View {
             break
         case .edit(let assignment):
             type = assignment.type
-            itemID = assignment.itemID
-            personID = assignment.personID
+            itemId = assignment.itemId
+            personId = assignment.personId
             if let assignmentDueDate = assignment.dueDate {
                 dueDate = assignmentDueDate
                 hasDate = true
@@ -562,24 +562,28 @@ struct AssignmentFormView: View {
     }
     
     private func saveAssignment() {
-        guard let item = itemID, let person = personID else { return }
+        guard let item = itemId, let person = personId else { return }
         
         switch mode {
         case .add:
             let newAssignment = Assignment(
+                id: UUID().uuidString,
                 type: type,
-                itemID: item,
-                personID: person,
+                itemId: item,
+                personId: person,
                 dueDate: hasDate ? dueDate : nil,
-                notes: notes.isEmpty ? nil : notes
+                notes: notes.isEmpty ? nil : notes,
+                createdById: UUID().uuidString, // This should be the current user's ID in a real app
+                createdAt: Date(),
+                updatedAt: Date()
             )
             dataStore.addAssignment(newAssignment)
             
         case .edit(let assignment):
             var updatedAssignment = assignment
             updatedAssignment.type = type
-            updatedAssignment.itemID = item
-            updatedAssignment.personID = person
+            updatedAssignment.itemId = item
+            updatedAssignment.personId = person
             updatedAssignment.dueDate = hasDate ? dueDate : nil
             updatedAssignment.notes = notes.isEmpty ? nil : notes
             updatedAssignment.updatedAt = Date()

@@ -6,6 +6,9 @@
 //
 
 import SwiftUI
+import Foundation
+
+// MARK: - Main View
 
 struct IssuesView: View {
     @EnvironmentObject var dataStore: AppDataStore
@@ -102,6 +105,24 @@ struct IssuesView: View {
     }
 }
 
+struct FilterButton: View {
+    let title: String
+    let isSelected: Bool
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            Text(title)
+                .fontWeight(isSelected ? .bold : .regular)
+                .padding(.vertical, 8)
+                .padding(.horizontal, 16)
+                .background(isSelected ? Color.blue.opacity(0.2) : Color.gray.opacity(0.1))
+                .cornerRadius(8)
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+}
+
 struct IssueRowView: View {
     @EnvironmentObject var dataStore: AppDataStore
     let issue: Issue
@@ -127,40 +148,34 @@ struct IssueRowView: View {
                 
                 Spacer()
                 
-                HStack {
-                    Image(systemName: "bubble.left")
-                    Text("\(issue.comments.count)")
-                }
-                .font(.caption)
-                .foregroundColor(.secondary)
+                Text("Updated: \(formattedDate(issue.updatedAt))")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
             }
             
-            HStack(spacing: 12) {
-                if let reporter = dataStore.getPerson(with: issue.reporterID) {
-                    HStack(spacing: 4) {
-                        Image(systemName: "person")
-                            .font(.caption)
-                        Text("Reporter: \(reporter.name)")
-                            .font(.caption)
-                    }
+            // Assignee info
+            if let assigneeId = issue.assigneeId, let assignee = dataStore.getPerson(with: assigneeId) {
+                HStack(spacing: 4) {
+                    Image(systemName: "person.fill")
+                        .font(.caption)
+                    Text("Assignee: \(assignee.name)")
+                        .font(.caption)
                 }
-                
-                if let assigneeID = issue.assigneeID, let assignee = dataStore.getPerson(with: assigneeID) {
-                    HStack(spacing: 4) {
-                        Image(systemName: "person.fill")
-                            .font(.caption)
-                        Text("Assignee: \(assignee.name)")
-                            .font(.caption)
-                    }
-                }
+                .foregroundColor(.secondary)
             }
-            .foregroundColor(.secondary)
             
             if !issue.tags.isEmpty {
                 TagsView(tags: issue.tags)
             }
         }
         .padding(.vertical, 4)
+    }
+    
+    func formattedDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .short
+        formatter.timeStyle = .short
+        return formatter.string(from: date)
     }
 }
 
@@ -195,45 +210,31 @@ struct IssueDetailView: View {
                         .foregroundColor(.secondary)
                 }
                 
-                // Reporter and Assignee
-                HStack {
-                    VStack(alignment: .leading) {
-                        Text("Reporter")
+                // Reporter and Assignee info
+                let reporter = dataStore.getPerson(with: issue.reporterId)
+                if let reporter = reporter {
+                    HStack {
+                        Text("Reporter: \(reporter.name) (\(reporter.role))")
+                        Spacer()
+                        Text(reporter.email)
                             .font(.caption)
-                            .foregroundColor(.secondary)
-                        
-                        if let reporter = dataStore.getPerson(with: issue.reporterID) {
-                            HStack {
-                                Image(systemName: reporter.profileImage ?? "person")
-                                    .foregroundColor(.blue)
-                                Text(reporter.name)
-                            }
-                        }
                     }
-                    
-                    Spacer()
-                    
-                    VStack(alignment: .trailing) {
-                        Text("Assignee")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        
-                        if let assigneeID = issue.assigneeID, let assignee = dataStore.getPerson(with: assigneeID) {
-                            HStack {
-                                Text(assignee.name)
-                                Image(systemName: assignee.profileImage ?? "person.fill")
-                                    .foregroundColor(.blue)
-                            }
-                        } else {
-                            Text("Unassigned")
-                                .italic()
-                                .foregroundColor(.secondary)
-                        }
-                    }
+                    .padding()
+                    .background(Color.orange.opacity(0.1))
+                    .cornerRadius(8)
                 }
-                .padding()
-                .background(Color.blue.opacity(0.1))
-                .cornerRadius(8)
+                
+                if let assigneeId = issue.assigneeId, let assignee = dataStore.getPerson(with: assigneeId) {
+                    HStack {
+                        Text("Assigned to: \(assignee.name) (\(assignee.role))")
+                        Spacer()
+                        Text(assignee.email)
+                            .font(.caption)
+                    }
+                    .padding()
+                    .background(Color.blue.opacity(0.1))
+                    .cornerRadius(8)
+                }
                 
                 // Tags
                 if !issue.tags.isEmpty {
@@ -294,19 +295,17 @@ struct IssueDetailView: View {
         }
     }
     
-    private func formattedDate(_ date: Date) -> String {
+    func formattedDate(_ date: Date) -> String {
         let formatter = DateFormatter()
-        formatter.dateStyle = .medium
+        formatter.dateStyle = .short
         formatter.timeStyle = .short
         return formatter.string(from: date)
     }
     
-    private func addComment() {
-        guard !newCommentText.isEmpty, let currentUserID = dataStore.people.first?.id else { return }
-        
+    func addComment() {
         let comment = Comment(
             content: newCommentText,
-            authorID: currentUserID
+            authorId: "123E4567-E89B-12D3-A456-426614174000" // Replace with actual user ID
         )
         
         dataStore.addComment(to: issue.id, comment: comment)
@@ -320,37 +319,29 @@ struct CommentView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                if let author = dataStore.getPerson(with: comment.authorID) {
-                    Image(systemName: author.profileImage ?? "person")
-                        .foregroundColor(.blue)
+            if let author = dataStore.getPerson(with: comment.authorId) {
+                HStack {
                     Text(author.name)
-                        .fontWeight(.medium)
-                } else {
-                    Image(systemName: "person")
-                        .foregroundColor(.gray)
-                    Text("Unknown User")
-                        .fontWeight(.medium)
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                    
+                    Spacer()
+                    
+                    Text(formattedDate(comment.createdAt))
+                        .font(.caption)
                         .foregroundColor(.secondary)
                 }
-                
-                Spacer()
-                
-                Text(formattedDate(comment.createdAt))
-                    .font(.caption)
-                    .foregroundColor(.secondary)
             }
             
             Text(comment.content)
-                .padding(.leading, 4)
+                .font(.body)
         }
         .padding()
-        .background(Color.gray.opacity(0.1))
+        .background(Color(UIColor.secondarySystemBackground))
         .cornerRadius(8)
-        .padding(.vertical, 4)
     }
     
-    private func formattedDate(_ date: Date) -> String {
+    func formattedDate(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateStyle = .short
         formatter.timeStyle = .short
@@ -369,14 +360,12 @@ struct IssueFormView: View {
     @State private var priority = Priority.medium
     @State private var status = TaskStatus.todo
     @State private var tagsText = ""
-    @State private var reporterID: UUID
-    @State private var assigneeID: UUID?
+    @State private var reporterID: String
+    @State private var assigneeID: String?
     
     init(mode: FormMode<Issue>) {
         self.mode = mode
-        
-        // Ensure we have a default reporter (first person in list)
-        _reporterID = State(initialValue: Person.sampleData.first?.id ?? UUID())
+        _reporterID = State(initialValue: Person.sampleData.first?.id ?? UUID().uuidString)
     }
     
     var body: some View {
@@ -417,9 +406,9 @@ struct IssueFormView: View {
                     }
                     
                     Picker("Assigned To", selection: $assigneeID) {
-                        Text("Unassigned").tag(nil as UUID?)
+                        Text("Unassigned").tag(nil as String?)
                         ForEach(dataStore.people) { person in
-                            Text(person.name).tag(person.id as UUID?)
+                            Text(person.name).tag(person.id as String?)
                         }
                     }
                 }
@@ -459,27 +448,20 @@ struct IssueFormView: View {
     private func setupInitialValues() {
         switch mode {
         case .add:
-            // Make sure we have a default reporter if not already set
-            if dataStore.people.isEmpty == false && !dataStore.people.contains(where: { $0.id == reporterID }) {
-                reporterID = dataStore.people[0].id
-            }
-            
+            break
         case .edit(let issue):
             title = issue.title
             description = issue.description
             priority = issue.priority
             status = issue.status
             tagsText = issue.tags.joined(separator: ", ")
-            reporterID = issue.reporterID
-            assigneeID = issue.assigneeID
+            reporterID = issue.reporterId
+            assigneeID = issue.assigneeId
         }
     }
     
     private func saveIssue() {
-        let tags = tagsText
-            .split(separator: ",")
-            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .filter { !$0.isEmpty }
+        let tags = tagsText.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
         
         switch mode {
         case .add:
@@ -489,22 +471,28 @@ struct IssueFormView: View {
                 priority: priority,
                 status: status,
                 tags: tags,
-                reporterID: reporterID,
-                assigneeID: assigneeID
+                reporterId: reporterID,
+                assigneeId: assigneeID
             )
             dataStore.addIssue(newIssue)
             
-        case .edit(let issue):
-            var updatedIssue = issue
+        case .edit(let existingIssue):
+            var updatedIssue = existingIssue
             updatedIssue.title = title
             updatedIssue.description = description
             updatedIssue.priority = priority
             updatedIssue.status = status
             updatedIssue.tags = tags
-            updatedIssue.reporterID = reporterID
-            updatedIssue.assigneeID = assigneeID
+            updatedIssue.reporterId = reporterID
+            updatedIssue.assigneeId = assigneeID
             updatedIssue.updatedAt = Date()
+            
             dataStore.updateIssue(updatedIssue)
         }
     }
+}
+
+#Preview {
+    IssuesView()
+        .environmentObject(AppDataStore(loadSampleData: true))
 }
