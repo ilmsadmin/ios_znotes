@@ -17,7 +17,7 @@ struct AuthRootView: View {
             switch authManager.authState {
             case .unauthenticated, .authenticating:
                 LoginView()
-            case .authenticated(let user):
+            case .authenticated(_):
                 ContentView()
                     .environmentObject(appDataStore)
                     .environmentObject(authManager)

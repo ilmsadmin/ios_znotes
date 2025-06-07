@@ -132,7 +132,7 @@ struct EmailVerificationView: View {
         .onAppear {
             authManager.clearError()
         }
-        .onChange(of: authManager.authState) { state in
+        .onChange(of: authManager.authState) { _, state in
             if case .unauthenticated = state {
                 // User will be redirected to login screen
             }

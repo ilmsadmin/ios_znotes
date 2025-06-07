@@ -162,7 +162,7 @@ struct RegisterView: View {
                 }
             }
         }
-        .onChange(of: authManager.authState) { state in
+        .onChange(of: authManager.authState) { _, state in
             switch state {
             case .emailVerificationRequired:
                 showingEmailVerification = true
